@@ -1,0 +1,123 @@
+name: Test & Publish to PowerShell Gallery
+
+on:
+  push:
+    tags:
+      - "v*"
+
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag release da ripubblicare (es: v1.2.3)"
+        required: true
+        type: string
+
+concurrency:
+  group: publish-${{ github.workflow }}-${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  test_unit:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/tags/{0}', inputs.tag) || github.ref }}
+
+      - name: Validate manual tag input
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        shell: powershell
+        run: |
+          if ('${{ inputs.tag }}' -notmatch '^v') {
+            throw "Input 'tag' must start with 'v' (example: v1.2.3)."
+          }
+          git rev-parse --verify "refs/tags/${{ inputs.tag }}" | Out-Null
+
+      - name: Install Pester 5
+        shell: powershell
+        run: |
+          Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
+          Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+          Install-Module Pester -Scope CurrentUser -Force -SkipPublisherCheck
+
+      - name: Run Unit Tests
+        shell: powershell
+        run: |
+          Import-Module Pester -MinimumVersion 5.0.0 -Force
+          ./Tools/Run-Tests.ps1
+
+  publish_module:
+    needs: test_unit
+
+    # Solo tag stabili (vX.Y.Z)
+    # I workflow_dispatch vengono sempre consentiti
+    if: ${{ github.event_name == 'workflow_dispatch' || !contains(github.ref_name, '-') }}
+
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/tags/{0}', inputs.tag) || github.ref }}
+
+      - name: Validate tag and manifest prerelease alignment
+        shell: powershell
+        run: |
+          $Tag = if ('${{ github.event_name }}' -eq 'workflow_dispatch') {
+            '${{ inputs.tag }}'
+          }
+          else {
+            '${{ github.ref_name }}'
+          }
+
+          if ($Tag -notmatch '^v(?<version>\d+\.\d+\.\d+)(?:-(?<prerelease>[0-9A-Za-z.-]+))?$') {
+            throw "Tag '$Tag' is not valid. Expected vMAJOR.MINOR.PATCH or vMAJOR.MINOR.PATCH-prerelease."
+          }
+
+          $TagVersion = $Matches.version
+          $TagPrerelease = $Matches.prerelease
+
+          $Manifest = Import-PowerShellDataFile './PowerShellWSL.psd1'
+          $ManifestVersion = [string]$Manifest.ModuleVersion
+          $ManifestPrerelease = [string]$Manifest.PrivateData.PSData.Prerelease
+
+          if ($ManifestVersion -ne $TagVersion) {
+            throw "Manifest ModuleVersion '$ManifestVersion' does not match tag version '$TagVersion'."
+          }
+
+          if ([string]::IsNullOrWhiteSpace($TagPrerelease)) {
+            if (-not [string]::IsNullOrWhiteSpace($ManifestPrerelease)) {
+              throw "Stable tag '$Tag' requires empty Prerelease in manifest, found '$ManifestPrerelease'."
+            }
+          }
+          else {
+            if ([string]::IsNullOrWhiteSpace($ManifestPrerelease)) {
+              throw "Prerelease tag '$Tag' requires PrivateData.PSData.Prerelease='$TagPrerelease' in manifest."
+            }
+
+            if ($ManifestPrerelease -ne $TagPrerelease) {
+              throw "Manifest Prerelease '$ManifestPrerelease' does not match tag prerelease '$TagPrerelease'."
+            }
+          }
+      - name: Update manifest with changelog
+        shell: powershell
+        run: |
+          $Tag = if ('${{ github.event_name }}' -eq 'workflow_dispatch') {
+            '${{ inputs.tag }}'
+          }
+          else {
+            '${{ github.ref_name }}'
+          }
+
+          Write-Host "Updating manifest with changelog"
+          ./Tools/Add-ChangelogToManifest.ps1
+      - name: Publish module on PsGallery
+        uses: aammirmirza/Publish2PSGallery@PSGallery_v2
+        with:
+          NuGetApiKey: ${{ secrets.PowerShellGalleryApiKey }}
+          modulePath: ./

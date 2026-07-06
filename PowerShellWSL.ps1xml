@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Configuration>
+    <ViewDefinitions>
+
+        <View>
+            <Name>WslDistributionTable</Name>
+
+            <ViewSelectedBy>
+                <TypeName>WslDistribution</TypeName>
+            </ViewSelectedBy>
+
+            <TableControl>
+
+                <TableHeaders>
+
+                    <TableColumnHeader>
+                        <Label>Distribution</Label>
+                        <Width>15</Width>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>IsDefault</Label>
+                        <Width>10</Width>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>Version</Label>
+                        <Width>7</Width>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>Status</Label>
+                        <Width>8</Width>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>VhdFile</Label>
+                    </TableColumnHeader>
+                </TableHeaders>
+                <TableRowEntries>
+                    <TableRowEntry>
+                        <TableColumnItems>
+                            <TableColumnItem>
+                                <PropertyName>Distribution</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>IsDefault</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>Version</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>Status</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <ScriptBlock>
+                                    $Path = $_.VhdFile
+                                    $PathElem = $Path -split '\\'
+
+                                    if ($Path.Length -le 60) {
+                                        $Path
+                                    } else {
+                                        ($PathElem | Foreach-Object {
+                                        if ($_.Length -gt 10) {
+                                            "..."
+                                        } else {
+                                            $_
+                                        }
+                                        }) -join '\'
+                                    }
+                                </ScriptBlock>
+                            </TableColumnItem>
+                        </TableColumnItems>
+                    </TableRowEntry>
+                </TableRowEntries>
+            </TableControl>
+        </View>
+    </ViewDefinitions>
+</Configuration>

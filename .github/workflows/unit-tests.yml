@@ -1,0 +1,28 @@
+name: Unit Tests
+
+on:
+  pull_request:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+jobs:
+  test-unit:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Pester 5
+        shell: pwsh
+        run: |
+          Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+          Install-Module Pester -Scope CurrentUser -Force -SkipPublisherCheck
+
+      - name: Run Unit Tests
+        shell: pwsh
+        run: |
+          Import-Module Pester -MinimumVersion 5.0.0 -Force
+          ./Tools/Run-Tests.ps1

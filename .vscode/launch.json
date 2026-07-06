@@ -1,0 +1,24 @@
+{
+    "configurations": [
+        {
+            "name": "PowerShell: Windows PowerShell",
+            "type": "PowerShell",
+            "request": "launch",
+            "sessionName": "Windows PowerShell (x64)"
+        },
+        {
+            "name": "PowerShell: Module Interactive Session",
+            "type": "PowerShell",
+            "request": "launch",
+            "script": "Remove-Module PowerShellWSL*; ls \"$${workspaceFolder}/PowerShellWSL.*\" | % {Import-Module $_.FullName}; Import-Module \"${workspaceFolder}/PowerShellWSL\""
+        },
+        {
+            "name": "Debug PowerShell Script",
+            "type": "PowerShell",
+            "request": "launch",
+            "script": "${workspaceFolder}/myscript.ps1",
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}
