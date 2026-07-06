@@ -119,7 +119,7 @@
         PSData = @{
 
             # Tags applied to this module. These help with module discovery in online galleries.
-            # Tags = @()
+            Tags = @("wsl", "linux", "windows-subsystem-for-linux", "powershell", "powershell-module", "windows11", "windows10", "windows", "microsoft", "microsoft-windows", "microsoft-windows-subsystem-for-linux")
 
             LicenseUri = 'https://github.com/rez23/PowerShellWSL/blob/main/LICENSE'
             # LicenseUri = ''
