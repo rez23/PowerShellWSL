@@ -103,11 +103,11 @@ Get-WslDistribution -Status Running
 Find-WslDistribution -Distribution "Ubuntu*"
 ```
 ```stdout
-Distribution FriendlyName     IsInstalled VHDFile
------------- ------------     ----------- -------
-Ubuntu       Ubuntu                  True C:\...\ext4.vhdx
-Ubuntu-26.04 Ubuntu 26.04 LTS       False C:\...\ext4.vhdx
-Ubuntu-24.04 Ubuntu 24.04 LTS       False C:\...\ext4.vhdx
+Distribution FriendlyName     IsInstalled
+------------ ------------     -----------
+Ubuntu       Ubuntu                  True
+Ubuntu-26.04 Ubuntu 26.04 LTS       False
+Ubuntu-24.04 Ubuntu 24.04 LTS       False
 Ubuntu-22.04 Ubuntu 22.04 LTS       False
 ```
 
