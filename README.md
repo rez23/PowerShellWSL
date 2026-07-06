@@ -65,29 +65,29 @@ Windows    : 10.0.26200.8737
 Get-WslDistribution
 ```
 ```stdout
-Distribution   Version IsDefault  Status
-------------   ------- ---------  ------
-Ubuntu         2            True Stopped
-docker-desktop 2           False Stopped
-archlinux      2           False Stopped
+Distribution   Version IsDefault  Status VHDFile
+------------   ------- ---------  ------ --------
+Ubuntu         2            True Stopped C:\...\ext4.vhdx
+docker-desktop 2           False Stopped C:\Docker\...\ext4.vhdx
+archlinux      2           False Stopped C:\Docker\...\ext4.vhdx
 ```
 
 ```powershell
 Get-WslDistribution -Default
 ```
 ```stdout
-Distribution Version IsDefault  Status
------------- ------- ---------  ------
-Ubuntu       2            True Stopped
+Distribution Version IsDefault  Status VHDFile
+------------ ------- ---------  ------ --------
+Ubuntu       2            True Stopped C:\wsl\...\ext4.vhdx
 ```
 
 ```powershell
 Get-WslDistribution -Distribution "Ubuntu*"
 ```
 ```stdout
-Distribution Version IsDefault  Status
------------- ------- ---------  ------
-Ubuntu       2            True Stopped
+Distribution Version IsDefault  Status VHDFile
+------------ ------- ---------  ------ --------
+Ubuntu       2            True Stopped C:\...\ext4.vhdx
 ```
 
 ```powershell
@@ -103,11 +103,11 @@ Get-WslDistribution -Status Running
 Find-WslDistribution -Distribution "Ubuntu*"
 ```
 ```stdout
-Distribution FriendlyName     IsInstalled
------------- ------------     -----------
-Ubuntu       Ubuntu                  True
-Ubuntu-26.04 Ubuntu 26.04 LTS       False
-Ubuntu-24.04 Ubuntu 24.04 LTS       False
+Distribution FriendlyName     IsInstalled VHDFile
+------------ ------------     ----------- -------
+Ubuntu       Ubuntu                  True C:\...\ext4.vhdx
+Ubuntu-26.04 Ubuntu 26.04 LTS       False C:\...\ext4.vhdx
+Ubuntu-24.04 Ubuntu 24.04 LTS       False C:\...\ext4.vhdx
 Ubuntu-22.04 Ubuntu 22.04 LTS       False
 ```
 
